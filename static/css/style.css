@@ -1,0 +1,34 @@
+/* style.css: Styles for making the UI consistent, including the dark mode theme for chat. */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+form {
+    margin: 20px;
+}
+
+#chat-container {
+    width: 60%;
+    margin: 20px auto;
+    border: 1px solid #ffffff;
+    padding: 10px;
+    background-color: #1e1e1e;
+}
+
+#chat-box {
+    height: 300px;
+    overflow-y: scroll;
+    border: 1px solid #ffffff;
+    margin-bottom: 10px;
+}
+
+#message {
+    width: 80%;
+    padding: 10px;
+}
+
+#send, #exit {
+    padding: 10px;
+}

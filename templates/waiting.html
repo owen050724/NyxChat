@@ -1,13 +1,21 @@
-<!-- waiting.html: The page displayed while waiting for another user with the same code. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NyxChat - Waiting</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/script.js" defer></script>
+    <title>Waiting Room</title>
 </head>
 <body>
-    <p>Waiting for another user to join...</p>
+    <div class="container">
+        <h1>Waiting for another participant...</h1>
+        <p id="timer">60</p>
+        <p>Waiting...</p>
+    </div>
+    <script>
+        const code = "{{ code }}";
+        joinWaiting(code);
+    </script>
 </body>
 </html>

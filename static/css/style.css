@@ -1,34 +1,46 @@
-/* style.css: Styles for making the UI consistent, including the dark mode theme for chat. */
 body {
-    background-color: #121212;
-    color: #ffffff;
     font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
 
-form {
-    margin: 20px;
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-#chat-container {
-    width: 60%;
-    margin: 20px auto;
-    border: 1px solid #ffffff;
+input[type="text"] {
     padding: 10px;
-    background-color: #1e1e1e;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-#chat-box {
-    height: 300px;
-    overflow-y: scroll;
-    border: 1px solid #ffffff;
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.chat-window {
+    width: 300px;
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
     margin-bottom: 10px;
-}
-
-#message {
-    width: 80%;
     padding: 10px;
-}
-
-#send, #exit {
-    padding: 10px;
+    background-color: #f9f9f9;
 }

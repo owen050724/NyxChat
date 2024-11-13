@@ -1,76 +1,89 @@
-# app.py: The main Python script that contains the Flask application logic.
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask_socketio import SocketIO, join_room, leave_room, send
-import time
+from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO, join_room, leave_room, emit
+import random
+import string
 import threading
+import time
 
 app = Flask(__name__)
-app.secret_key = "pyo_ait2024"
-socketio = SocketIO(app)
-codes = {}
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 rooms = {}
 
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        code = request.form['code']
+        return redirect(url_for('waiting', code=code))
     return render_template('index.html')
 
-@app.route('/enter_code', methods=['POST'])
-def enter_code():
-    code = request.form['code']
-    session['code'] = code
-    if code not in codes:
-        codes[code] = time.time()
-        threading.Thread(target=wait_for_users, args=(code,)).start()
-        return render_template('waiting.html')
-    else:
-        return redirect(url_for('nickname'))
 
-def wait_for_users(code):
-    time.sleep(60)
-    if time.time() - codes[code] >= 60:
-        codes.pop(code, None)
-        rooms[code] = None
+@app.route('/waiting/<code>')
+def waiting(code):
+    return render_template('waiting.html', code=code)
 
-@app.route('/nickname', methods=['GET', 'POST'])
-def nickname():
-    if request.method == 'POST':
-        nickname = request.form['nickname']
-        session['nickname'] = nickname
-        room = session.get('code')
-        if room not in rooms:
-            rooms[room] = []
-        return redirect(url_for('chat'))
-    return render_template('nickname.html')
 
-@app.route('/chat')
-def chat():
-    nickname = session.get('nickname')
-    room = session.get('code')
-    if not nickname or not room:
-        return redirect(url_for('index'))
+@app.route('/chat/<room>/<nickname>')
+def chat(room, nickname):
     return render_template('chat.html', room=room, nickname=nickname)
 
-@socketio.on('join')
-def on_join(data):
-    nickname = session.get('nickname')
-    room = session.get('code')
+
+@socketio.on('join_waiting')
+def on_join_waiting(data):
+    code = data['code']
+    sid = request.sid
+    nickname = random_nickname()
+
+    if code in rooms:
+        rooms[code].append(sid)
+        if len(rooms[code]) == 2:
+            emit('matched', {'nickname': nickname}, room=sid)
+            emit('matched', {'nickname': random_nickname()}, room=rooms[code][0])
+    else:
+        rooms[code] = [sid]
+        timer = threading.Timer(60.0, timeout, args=[code, sid])
+        timer.start()
+
+
+@socketio.on('nickname_set')
+def nickname_set(data):
+    room = data['room']
+    nickname = data['nickname']
     join_room(room)
-    send(f"{nickname} has entered the room.", room=room)
+    emit('chat_message', {'message': f'{nickname} has joined the chat.'}, room=room)
 
-@socketio.on('message')
-def handle_message(data):
-    nickname = session.get('nickname')
-    room = session.get('code')
-    message = f"{nickname}: {data}"
-    send(message, room=room)
 
-@app.route('/exit')
-def exit():
-    room = session.get('code')
+@socketio.on('send_message')
+def handle_send_message(data):
+    room = data['room']
+    message = data['message']
+    nickname = data['nickname']
+    emit('chat_message', {'message': f'{nickname}: {message}'}, room=room)
+
+
+@socketio.on('exit_chat')
+def exit_chat(data):
+    room = data['room']
     leave_room(room)
-    if room in rooms:
-        del rooms[room]
-    return redirect(url_for('index'))
+    emit('chat_message', {'message': 'The chat has ended.'}, room=room)
+    del rooms[room]
 
-if __name__ == "__main__":
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
+
+# Helper function to create a random nickname
+def random_nickname():
+    return 'User' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+
+
+# Timeout function for waiting room
+def timeout(code, sid):
+    if code in rooms and sid in rooms[code]:
+        rooms[code].remove(sid)
+        socketio.emit('timeout', room=sid)
+        if not rooms[code]:
+            del rooms[code]
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)

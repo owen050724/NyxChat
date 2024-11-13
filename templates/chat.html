@@ -1,20 +1,24 @@
-<!-- chat.html: The main chat page where users can communicate. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NyxChat - Chat Room</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-    <script src="../static/js/chat.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="/static/js/script.js" defer></script>
+    <title>Chat Room</title>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-box"></div>
-        <input type="text" id="message" placeholder="Type a message...">
-        <button id="send">Send</button>
-        <button id="exit">Exit</button>
+    <div class="container">
+        <div class="chat-window" id="chat-window"></div>
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="exitChat()" id="exit-btn">Exit</button>
     </div>
+    <script>
+        const room = "{{ room }}";
+        const nickname = "{{ nickname }}";
+        setupChat(room, nickname);
+    </script>
 </body>
 </html>

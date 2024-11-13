@@ -15,8 +15,9 @@ def chat():
 
 @socketio.on('message')
 def handle_message(msg):
-    print('Message: ' + msg)
-    send(msg, broadcast=True)
+    if msg != '':  # 빈 메시지는 처리하지 않음
+        print('Message: ' + msg)
+        send(msg, broadcast=True)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

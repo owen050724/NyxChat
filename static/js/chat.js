@@ -1,4 +1,3 @@
-// chat.js: JavaScript file for managing chat functionality, like sending messages and interacting with the WebSocket.
 const socket = io();
 
 window.onload = () => {
@@ -6,15 +5,28 @@ window.onload = () => {
     socket.emit('join', { room });
 
     document.getElementById('send').onclick = () => {
-        const message = document.getElementById('message').value;
-        socket.send(message);
-        document.getElementById('message').value = '';
+        sendMessage();
     };
+
+    document.getElementById('message').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
 
     document.getElementById('exit').onclick = () => {
         window.location.href = '/exit';
     };
 };
+
+function sendMessage() {
+    const message = document.getElementById('message').value;
+    if (message.trim() !== '') {
+        socket.send(message);
+        document.getElementById('message').value = '';
+    }
+}
 
 socket.on('message', (msg) => {
     const chatBox = document.getElementById('chat-box');

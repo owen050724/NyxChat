@@ -1,22 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io();
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    const form = document.getElementById('chat-form');
-    const input = document.getElementById('message-input');
-    const messages = document.getElementById('messages');
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (input.value) {
-            socket.send(input.value);
-            input.value = '';
-        }
+    socket.on('connect', () => {
+        console.log('Connected to server');
     });
 
+    document.getElementById('send-button').onclick = () => {
+        let message = document.getElementById('message-input').value;
+        socket.send(message);
+        document.getElementById('message-input').value = '';
+    };
+
     socket.on('message', (msg) => {
-        const item = document.createElement('li');
-        item.textContent = msg;
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+        let messages = document.getElementById('messages');
+        let li = document.createElement('li');
+        li.innerHTML = msg;
+        messages.appendChild(li);
+        messages.scrollTop = messages.scrollHeight;
     });
 });

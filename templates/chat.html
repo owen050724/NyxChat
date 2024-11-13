@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양방향 채팅</title>
     <link rel="stylesheet" href="/static/css/styles.css">
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-    <script src="/static/js/script.js" defer></script>
-    <title>Chat Room</title>
 </head>
 <body>
-    <div class="container">
-        <div class="chat-window" id="chat-window"></div>
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
-        <button onclick="exitChat()" id="exit-btn">Exit</button>
+    <div id="chat-container">
+        <ul id="messages"></ul>
+        <form id="chat-form">
+            <input id="message-input" autocomplete="off" placeholder="메시지를 입력하세요" />
+            <button>전송</button>
+        </form>
     </div>
-    <script>
-        const nickname = "{{ nickname }}";
-        setupChat(nickname);
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="/static/js/script.js"></script>
 </body>
 </html>

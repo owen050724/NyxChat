@@ -1,43 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, join_room, leave_room, emit
-import random
-import string
+from flask import Flask, render_template
+from flask_socketio import SocketIO, send
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app)
 
-@app.route('/', methods=['GET', 'POST'])
+# 라우트 설정
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        nickname = request.form['nickname']
-        return redirect(url_for('chat', nickname=nickname))
     return render_template('index.html')
 
-@app.route('/chat/<nickname>')
-def chat(nickname):
-    return render_template('chat.html', nickname=nickname)
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
 
-@socketio.on('join_chat')
-def on_join_chat(data):
-    nickname = data['nickname']
-    room = 'chatroom'
-    join_room(room)
-    emit('chat_message', {'message': f'{nickname} has joined the chat.'}, room=room)
+# 메시지 처리
+@socketio.on('message')
+def handle_message(msg):
+    print(f'메시지 수신: {msg}')
+    send(msg, broadcast=True)
 
-@socketio.on('send_message')
-def handle_send_message(data):
-    message = data['message']
-    nickname = data['nickname']
-    room = 'chatroom'
-    emit('chat_message', {'message': f'{nickname}: {message}'}, room=room)
-
-@socketio.on('exit_chat')
-def exit_chat(data):
-    nickname = data['nickname']
-    room = 'chatroom'
-    leave_room(room)
-    emit('chat_message', {'message': f'{nickname} has left the chat.'}, room=room)
-
+# 서버 시작
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

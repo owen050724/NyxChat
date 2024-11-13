@@ -21,20 +21,23 @@ def chat(nickname):
 @socketio.on('join_chat')
 def on_join_chat(data):
     nickname = data['nickname']
-    join_room('chatroom')
-    emit('chat_message', {'message': f'{nickname} has joined the chat.'}, room='chatroom')
+    room = 'chatroom'
+    join_room(room)
+    emit('chat_message', {'message': f'{nickname} has joined the chat.'}, room=room)
 
 @socketio.on('send_message')
 def handle_send_message(data):
     message = data['message']
     nickname = data['nickname']
-    emit('chat_message', {'message': f'{nickname}: {message}'}, room='chatroom')
+    room = 'chatroom'
+    emit('chat_message', {'message': f'{nickname}: {message}'}, room=room)
 
 @socketio.on('exit_chat')
 def exit_chat(data):
     nickname = data['nickname']
-    leave_room('chatroom')
-    emit('chat_message', {'message': f'{nickname} has left the chat.'}, room='chatroom')
+    room = 'chatroom'
+    leave_room(room)
+    emit('chat_message', {'message': f'{nickname} has left the chat.'}, room=room)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

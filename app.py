@@ -7,8 +7,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-rooms = []
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -23,8 +21,6 @@ def chat(nickname):
 @socketio.on('join_chat')
 def on_join_chat(data):
     nickname = data['nickname']
-    sid = request.sid
-    rooms.append(sid)
     join_room('chatroom')
     emit('chat_message', {'message': f'{nickname} has joined the chat.'}, room='chatroom')
 
@@ -39,10 +35,6 @@ def exit_chat(data):
     nickname = data['nickname']
     leave_room('chatroom')
     emit('chat_message', {'message': f'{nickname} has left the chat.'}, room='chatroom')
-
-# Helper function to create a random nickname
-def random_nickname():
-    return 'User' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

@@ -45,6 +45,7 @@ def on_join_waiting(data):
             # Cancel timer if a match is found before timeout
             if code in waiting_timers:
                 waiting_timers[code].cancel()
+                del waiting_timers[code]
     else:
         rooms[code] = [sid]
         timer = threading.Timer(60.0, timeout, args=[code, sid])

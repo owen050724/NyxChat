@@ -10,6 +10,7 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 rooms = {}
+waiting_timers = {}
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -41,9 +42,13 @@ def on_join_waiting(data):
         if len(rooms[code]) == 2:
             emit('matched', {'nickname': nickname}, room=sid)
             emit('matched', {'nickname': random_nickname()}, room=rooms[code][0])
+            # Cancel timer if a match is found before timeout
+            if code in waiting_timers:
+                waiting_timers[code].cancel()
     else:
         rooms[code] = [sid]
         timer = threading.Timer(60.0, timeout, args=[code, sid])
+        waiting_timers[code] = timer
         timer.start()
 
 
@@ -69,6 +74,8 @@ def exit_chat(data):
     leave_room(room)
     emit('chat_message', {'message': 'The chat has ended.'}, room=room)
     del rooms[room]
+    if room in waiting_timers:
+        del waiting_timers[room]
 
 
 # Helper function to create a random nickname
@@ -83,6 +90,8 @@ def timeout(code, sid):
         socketio.emit('timeout', room=sid)
         if not rooms[code]:
             del rooms[code]
+        if code in waiting_timers:
+            del waiting_timers[code]
 
 
 if __name__ == '__main__':
